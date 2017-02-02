@@ -27,12 +27,11 @@ def open_parser_eval(args):
             stdout=subprocess.PIPE
         )
 
-
 def send_input(process, input):
     process.stdin.write(input.encode("utf8"))
     process.stdin.write(b"\n\n")  # signal end of documents
     process.stdin.flush()
-    process.stdin.close()  # HERE
+
     response = b""
     while True:
         line = process.stdout.readline()
@@ -62,9 +61,8 @@ def split_tokens(parse):
         for line in parse.strip().split("\n")
         ]
 
-def parse_sentence(sentence, tags, base_dir):
+def parse_init(base_dir):
     configure(base_dir)
-    # Open the part-of-speech tagger.
     pos_tagger = open_parser_eval([
         "--input=stdin",
         "--output=stdout-conll",
@@ -74,7 +72,7 @@ def parse_sentence(sentence, tags, base_dir):
         "--task_context=" + MODEL_DIR + "/context.pbtxt",
         "--model_path=" + MODEL_DIR + "/tagger-params",
         "--slim_model",
-        "--batch_size=1024",
+        "--batch_size=1",
         "--alsologtostderr",
     ])
 
@@ -88,9 +86,13 @@ def parse_sentence(sentence, tags, base_dir):
         "--task_context=" + MODEL_DIR + "/context.pbtxt",
         "--model_path=" + MODEL_DIR + "/parser-params",
         "--slim_model",
-        "--batch_size=1024",
+        "--batch_size=1",
         "--alsologtostderr",
     ])
+    return pos_tagger, dependency_parser
+
+def parse_sentence(sentence, tags, pos_tagger, dependency_parser):
+    # Open the part-of-speech tagger.
     if "\n" in sentence or "\r" in sentence:
         raise ValueError()
 
@@ -120,6 +122,6 @@ def parse_sentence(sentence, tags, base_dir):
 
 if __name__ == "__main__":
     import sys, pprint
-
-    # pprint.pprint(parse_sentence(sys.stdin.read().strip())["tree"])
-    pprint.pprint(parse_sentence("Translate my CV from English to Portuguese"))
+    pos_tagger, dependency_parser = parse_init("/opt/tensorflow")
+    pprint.pprint(parse_sentence("Translate my CV from English to Portuguese", None, pos_tagger, dependency_parser))
+    pprint.pprint(parse_sentence("Change my CV from English to Portuguese", None, pos_tagger, dependency_parser))
