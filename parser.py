@@ -91,18 +91,17 @@ def parse_init(base_dir):
     ])
     return pos_tagger, dependency_parser
 
+
 def parse_sentence(sentence, tags, pos_tagger, dependency_parser):
-    # Open the part-of-speech tagger.
-    if "\n" in sentence or "\r" in sentence:
+    if sentence is not None:
+        if "\n" in sentence or "\r" in sentence:
+            raise ValueError()
+        pos_tags = send_input(pos_tagger, sentence + "\n")
+    elif tags is not None:
+        pos_tags = tags
+    else:
         raise ValueError()
 
-    if sentence is not None:
-    # Do POS tagging.
-        pos_tags = send_input(pos_tagger, sentence + "\n")
-    else:
-        pos_tags = tags
-
-    # Do syntax parsing.
     dependency_parse = send_input(dependency_parser, pos_tags)
 
     # Make a tree.

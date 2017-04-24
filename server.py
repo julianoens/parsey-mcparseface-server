@@ -22,9 +22,9 @@ def index():
     tags = None
 
     if request.method == 'GET':
-        sentence = request.args.get("sentence", "")
+        sentence = request.args.get("sentence", None)
         if sentence is None:
-            tags = request.args.get("tags", "")
+            tags = request.args.get("tags", None)
     else:
         sentence = request.get_json()['q']
     result = parser.parse_sentence(sentence, tags, pos_tagger, dependency_parser)
