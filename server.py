@@ -7,7 +7,6 @@ import os
 import sys
 
 from flask import Flask, request, Response
-from multiprocessing import Pool
 import json
 
 import parser
@@ -25,6 +24,9 @@ def index():
         sentence = request.args.get("sentence", None)
         if sentence is None:
             tags = request.args.get("tags", None)
+        else:
+            if len(sentence) == 0:
+                return Response(response="sentence can't be empty.", status=400)
     else:
         sentence = request.get_json()['q']
     result = parser.parse_sentence(sentence, tags, pos_tagger, dependency_parser)
