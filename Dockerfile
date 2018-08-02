@@ -1,4 +1,4 @@
-FROM tensorflow-syntaxnet
+FROM tensorflow/syntaxnet
 MAINTAINER Benedikt Lang <mail@blang.io>
 ENV DEBIAN_FRONTEND noninteractive
 
