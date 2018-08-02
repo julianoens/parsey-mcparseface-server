@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-# sudo apt-get install python3-pip
-# sudo pip3 install flask
-
 import os
 import sys
 

@@ -7,11 +7,13 @@ RUN apt-get install -qy python3-pip
 RUN pip3 install flask
 
 # Add files
-WORKDIR /opt/tensorflow/models/syntaxnet
+WORKDIR /opt/tensorflow/syntaxnet
 ADD parser.py .
 ADD server.py .
 
+RUN bazel test syntaxnet/... util/...
+
 EXPOSE 80
 
-CMD ["./server.py", "/opt/tensorflow"]
+CMD ["./server.py", "/opt/tensorflow/syntaxnet"]
 

@@ -4,28 +4,26 @@ from collections import OrderedDict
 import subprocess
 import os
 
-#"/home/juliano/resources/"
-BASE_DIR = None
 PARSER_EVAL = "bazel-bin/syntaxnet/parser_eval"
 MODEL_DIR = "syntaxnet/models/parsey_mcparseface"
+BASE_DIR = None
 
 
 def configure(base_dir):
     global BASE_DIR
     BASE_DIR = base_dir
 
-    global ROOT_DIR
-    ROOT_DIR = os.path.join(BASE_DIR, "models/syntaxnet")
-
 
 def open_parser_eval(args):
     if BASE_DIR is not None:
         return subprocess.Popen(
             [PARSER_EVAL] + args,
-            cwd=ROOT_DIR,
+            cwd=BASE_DIR,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
+    else:
+        print('BASE_DIR is None')
 
 def send_input(process, input):
     process.stdin.write(input.encode("utf8"))
@@ -61,6 +59,7 @@ def split_tokens(parse):
         for line in parse.strip().split("\n")
         ]
 
+
 def parse_init(base_dir):
     configure(base_dir)
     pos_tagger = open_parser_eval([
@@ -69,8 +68,8 @@ def parse_init(base_dir):
         "--hidden_layer_sizes=64",
         "--arg_prefix=brain_tagger",
         "--graph_builder=structured",
-        "--task_context=" + MODEL_DIR + "/context.pbtxt",
-        "--model_path=" + MODEL_DIR + "/tagger-params",
+        "--task_context=" + os.path.join(MODEL_DIR, 'context.pbtxt'),
+        "--model_path=" + os.path.join(MODEL_DIR, 'tagger-params'),
         "--slim_model",
         "--batch_size=1",
         "--alsologtostderr",
@@ -83,8 +82,8 @@ def parse_init(base_dir):
         "--hidden_layer_sizes=512,512",
         "--arg_prefix=brain_parser",
         "--graph_builder=structured",
-        "--task_context=" + MODEL_DIR + "/context.pbtxt",
-        "--model_path=" + MODEL_DIR + "/parser-params",
+        "--task_context=" + os.path.join(MODEL_DIR, 'context.pbtxt'),
+        "--model_path=" + os.path.join(MODEL_DIR, 'parser-params'),
         "--slim_model",
         "--batch_size=1",
         "--alsologtostderr",
@@ -120,7 +119,7 @@ def parse_sentence(sentence, tags, pos_tagger, dependency_parser):
 
 
 if __name__ == "__main__":
-    import sys, pprint
-    pos_tagger, dependency_parser = parse_init("/opt/tensorflow")
+    import pprint
+    pos_tagger, dependency_parser = parse_init("/opt/tensorflow/syntaxnet")
     pprint.pprint(parse_sentence("Translate my CV from English to Portuguese", None, pos_tagger, dependency_parser))
     pprint.pprint(parse_sentence("Change my CV from English to Portuguese", None, pos_tagger, dependency_parser))
